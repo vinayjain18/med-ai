@@ -5,9 +5,15 @@ from langchain_community.document_loaders import PyPDFLoader
 import streamlit as st
 import tempfile
 import os
+import logging
 # from dotenv import load_dotenv
 
 # load_dotenv()
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 system_prompt = """Act as a medical assistant with 15 years of experience reading and analyzing different medical reports like blood reports, biochemistry reports, blood sugar reports, and many more. I want you to analyze and give a detailed description of the given report. If the report contains multiple sub-reports, then break down your analysis report-wise.
 
 Focus only on the relevant information that is critical or useful for the person or doctor. Do not provide details that are unnecessary or not actionable. Highlight any abnormal conditions and provide precautions and suggestions on how to normalize those values. If a parameter is missing, unclear, or the report type is not recognized, note this and avoid speculation.
@@ -43,6 +49,7 @@ chain = template | llm | output_parser
 
 if uploaded_file is not None:
     with st.spinner("Analyzing your report..."):
+        logger.info(f"File uploaded: {uploaded_file.name}, Size: {uploaded_file.size} bytes")
         # Create a temporary file
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
             # Write the uploaded file data to the temporary file
@@ -54,7 +61,15 @@ if uploaded_file is not None:
             loader = PyPDFLoader(tmp_file_path)
             pages = loader.load()
 
+            logger.info("Starting report analysis")
+            logger.info(f"Report length: {len(pages)}")
+
             st.write(chain.invoke({'report': pages}))
+            logger.info("Report analysis completed successfully")
+        
+        except Exception as e:
+            logger.error(f"Unexpected error: {str(e)}")
+            st.error(f"An unexpected error occurred: {str(e)}")
 
         finally:
             # Clean up the temporary file
