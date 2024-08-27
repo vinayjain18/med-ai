@@ -2,17 +2,12 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_groq import ChatGroq
 from langchain_community.document_loaders import PyPDFLoader
-from dotenv import load_dotenv
-import os
 import streamlit as st
 import tempfile
+import os
+# from dotenv import load_dotenv
 
-load_dotenv()
-
-# loader = PyPDFLoader("Report.pdf")
-# report = loader.load_and_split()
-# print(report)
-
+# load_dotenv()
 system_prompt = """Act as a medical assistant with 15 years of experience reading and analyzing different medical reports like blood reports, biochemistry reports, blood sugar reports, and many more. I want you to analyze and give a detailed description of the given report. If the report contains multiple sub-reports, then break down your analysis report-wise.
 
 Focus only on the relevant information that is critical or useful for the person or doctor. Do not provide details that are unnecessary or not actionable. Highlight any abnormal conditions and provide precautions and suggestions on how to normalize those values. If a parameter is missing, unclear, or the report type is not recognized, note this and avoid speculation.
@@ -38,7 +33,7 @@ template = PromptTemplate.from_template(system_prompt)
 llm = ChatGroq(
     model="llama-3.1-70b-versatile",
     temperature=0.2,
-    api_key=os.getenv("GROQ_API_KEY")
+    api_key=st.secrets["GROQ_API_KEY"]
 )
 
 output_parser = StrOutputParser()

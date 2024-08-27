@@ -1,9 +1,9 @@
 import streamlit as st
 from groq import Groq
-from dotenv import load_dotenv
-import os
+# from dotenv import load_dotenv
+# import os
 
-load_dotenv()
+# load_dotenv()
 
 st.title("Health Assistant")
 with st.expander("ℹ️ Disclaimer"):
@@ -29,7 +29,7 @@ Once again, I'm saying - Don't hallucinate and if someone asked you any query ou
 just say "Sorry, I'm an AI health assistant and can help you with any query related to healthcare".
 """
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 
 if "openai_model" not in st.session_state:
     st.session_state["groq_model"] = "gemma2-9b-it"
