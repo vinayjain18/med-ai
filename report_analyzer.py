@@ -6,6 +6,8 @@ import streamlit as st
 import tempfile
 import os
 import logging
+import pytesseract
+from pdf2image import convert_from_path
 # from dotenv import load_dotenv
 
 # load_dotenv()
@@ -47,6 +49,32 @@ output_parser = StrOutputParser()
 chain = template | llm | output_parser
 # print(chain.invoke({'report': report}))
 
+def extract_text_from_pdf(pdf_path):
+    text = ""
+    try:
+        # First, try to extract text directly using PyPDFLoader
+        loader = PyPDFLoader(pdf_path)
+        pages = loader.load()
+        text = "\n".join([page.page_content for page in pages])
+        
+        # If no text is extracted, use OCR
+        if not text.strip():
+            logger.info("OCR process....converting image data to text")
+            images = convert_from_path(pdf_path)
+            for image in images:
+                # Convert image to string using Tesseract
+                ocr_text = pytesseract.image_to_string(image, config='--psm 6')
+                
+                # Split the extracted text into rows (lines)
+                rows = ocr_text.splitlines()
+                
+                # Remove empty lines and append to output
+                rows = [row for row in rows if row.strip() != '']
+                text += "\n".join(rows) + "\n"
+    except Exception as e:
+        logger.error(f"Error extracting text from PDF: {str(e)}")
+    return text
+
 if uploaded_file is not None:
     with st.spinner("Analyzing your report..."):
         logger.info(f"File uploaded: {uploaded_file.name}, Size: {uploaded_file.size} bytes")
@@ -57,15 +85,17 @@ if uploaded_file is not None:
             tmp_file_path = tmp_file.name
 
         try:
-            # Use PyPDFLoader to load the PDF
-            loader = PyPDFLoader(tmp_file_path)
-            pages = loader.load()
-
-            logger.info("Starting report analysis")
-            logger.info(f"Report length: {len(pages)}")
-
-            st.write(chain.invoke({'report': pages}))
-            logger.info("Report analysis completed successfully")
+            # Extract text from the PDF (including OCR if necessary)
+            report_text = extract_text_from_pdf(tmp_file_path)
+            
+            if not report_text.strip():
+                st.error("Unable to extract text from the PDF. Please ensure the file is not corrupted or password-protected.")
+            else:
+                logger.info("Starting report analysis")
+                logger.info(f"Report length: {len(report_text)} characters")
+                
+                st.write(chain.invoke({'report': report_text}))
+                logger.info("Report analysis completed successfully")
         
         except Exception as e:
             logger.error(f"Unexpected error: {str(e)}")
