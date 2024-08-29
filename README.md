@@ -1,6 +1,12 @@
 # MedAI - AI Health Assistant
 
-**Developed by [Vinay Jain](https://twitter.com/vinayjn18)**  
+<p align="left">
+  <img src="https://img.shields.io/badge/version-1.0.0-blue.svg?cacheSeconds=2592000" />
+  <img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" />
+  <a href="https://twitter.com/vinayjn18" target="_blank">
+    <img alt="Twitter: vinayjn18" src="https://img.shields.io/twitter/follow/vinayjn18.svg?style=social" />
+  </a>
+</p>  
 
 Welcome to MedAI, an AI-powered health assistant designed to help you understand and manage your health. This app offers a range of features to support you in making informed decisions about your well-being.
 
